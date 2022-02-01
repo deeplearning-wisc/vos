@@ -1,0 +1,13 @@
+_BASE_: "../Base-Inference.yaml"
+
+PROBABILISTIC_INFERENCE:
+    # One of the following: 'standard_nms', 'mc_dropout_ensembles',
+    # 'anchor_statistics', 'bayes_od', 'ensembles'
+    INFERENCE_MODE: 'ensembles'
+    AFFINITY_THRESHOLD: 0.9
+
+    ENSEMBLES:
+        BOX_MERGE_MODE: 'post_nms'  # 'pre_nms' or 'post_nms'
+        # Random Seeds used for training model parameters
+        RANDOM_SEED_NUMS: [0, 1000, 2000, 3000, 4000]
+        BOX_FUSION_MODE: 'mixture_of_gaussians' # 'mixture_of_gaussians' or 'bayesian_inference'

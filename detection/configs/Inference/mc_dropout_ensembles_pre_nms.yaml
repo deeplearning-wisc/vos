@@ -1,0 +1,15 @@
+_BASE_: "../Base-Inference.yaml"
+
+PROBABILISTIC_INFERENCE:
+    # One of the following: 'standard_nms', 'mc_dropout_ensembles',
+    # 'anchor_statistics', 'bayes_od', 'ensemble'
+    INFERENCE_MODE: 'mc_dropout_ensembles'
+    AFFINITY_THRESHOLD: 0.9
+
+    MC_DROPOUT:
+        # Enables MC_Dropout if INFERENCE_MODE supports it.
+        ENABLE: True
+        NUM_RUNS: 10
+
+    ENSEMBLES_DROPOUT:
+        BOX_MERGE_MODE: 'pre_nms'  # 'pre_nms' or 'post_nms'

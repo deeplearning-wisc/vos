@@ -1,0 +1,34 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+
+  META_ARCHITECTURE: "ProbabilisticGeneralizedRCNN"
+
+  ROI_HEADS:
+    NAME: "ProbabilisticROIHeads"
+    IN_FEATURES: [ "p2", "p3", "p4", "p5" ]
+    NUM_CLASSES: 20
+
+  PROBABILISTIC_MODELING:
+      # One of the following Loss types: 'none' or 'negative_log_likelihood', 'second_moment_matching', 'energy_loss'.
+      BBOX_COV_LOSS:
+          NAME: 'energy_loss'
+          COVARIANCE_TYPE: 'diagonal' # One of the following: 'full', 'diagonal'
+          NUM_SAMPLES: 1000
+
+  MASK_ON: False
+  RESNETS:
+    DEPTH: 50
+
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('voc_custom_train',)
+  TEST: ('voc_custom_val',)
+SOLVER:
+  STEPS: (12000, 16000)
+  MAX_ITER: 18000  # 17.4 epochs
+  WARMUP_ITERS: 100
+DATALOADER:
+    NUM_WORKERS: 8  # Depends on the available memory

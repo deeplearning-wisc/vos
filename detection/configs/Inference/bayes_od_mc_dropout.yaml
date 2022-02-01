@@ -1,0 +1,17 @@
+_BASE_: "../Base-Inference.yaml"
+
+PROBABILISTIC_INFERENCE:
+    # One of the following: 'standard_nms', 'mc_dropout_ensembles',
+    # 'anchor_statistics', 'bayes_od', 'ensemble'
+    INFERENCE_MODE: 'bayes_od'
+    AFFINITY_THRESHOLD: 0.9
+
+    MC_DROPOUT:
+        # Enables MC_Dropout if INFERENCE_MODE supports it.
+        ENABLE: True
+        NUM_RUNS: 10
+
+    BAYES_OD:
+        CLS_MERGE_MODE: 'max_score'  # 'bayesian_inference' or 'max_score'
+        # 'bayesian_inference' or 'covariance_intersection'
+        BOX_MERGE_MODE: 'bayesian_inference'

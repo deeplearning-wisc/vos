@@ -1,0 +1,31 @@
+_BASE_: "../../Base-RCNN-FPN.yaml"
+MODEL:
+  META_ARCHITECTURE: "GeneralizedRCNNLogisticGMM"
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+#  WEIGHTS: "./data/VOC-Detection/faster-rcnn/faster_rcnn_R_50_FPN_all_logistic/random_seed_0/model_final.pth"
+
+#  PROPOSAL_GENERATOR:
+#    NAME: "RPNLogistic"
+  MASK_ON: False
+  RESNETS:
+    DEPTH: 50
+  ROI_HEADS:
+    NAME: "ROIHeadsLogisticGMMNew"
+    NUM_CLASSES: 20
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('voc_custom_train',)
+  TEST: ('voc_custom_val',)
+SOLVER:
+  IMS_PER_BATCH: 16
+  BASE_LR: 0.02
+  STEPS: (12000, 16000)
+  MAX_ITER: 18000  # 17.4 epochs
+  WARMUP_ITERS: 100
+VOS:
+  STARTING_ITER: 12000
+  SAMPLE_NUMBER: 1000
+DATALOADER:
+    NUM_WORKERS: 8  # Depends on the available memory
