@@ -23,6 +23,9 @@ INPUT:
 DATASETS:
   TRAIN: ('voc_custom_train',)
   TEST: ('voc_custom_val',)
+VOS:
+  STARTING_ITER: 12000
+  SAMPLE_NUMBER: 1000
 SOLVER:
   IMS_PER_BATCH: 16
   BASE_LR: 0.02
