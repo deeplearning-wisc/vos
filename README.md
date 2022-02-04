@@ -194,7 +194,7 @@ The pretrained models for BDD-100k can be downloaded from [vanilla](https://driv
 
 **Train on WideResNet**
 ```
-cd classification/energy_ood/CIFAR/ & 
+cd classification/CIFAR/ & 
 python train_virtual.py 
 --start_epoch 40 
 --sample_number 1000 
@@ -214,7 +214,7 @@ Please see Section 3 and Section 4.1 in the paper for details.
 
 **Train on DenseNet**
 ```
-cd classification/energy_ood/CIFAR/ &
+cd classification/CIFAR/ &
 python train_virtual_dense.py 
 --start_epoch 40 
 --sample_number 1000 
@@ -226,7 +226,7 @@ python train_virtual_dense.py
 **Evaluation on different classifiers**
 
 ```
-cd classification/energy_ood/CIFAR/ & 
+cd classification/CIFAR/ & 
 python test.py 
 --model_name xx 
 --method_name xx 
