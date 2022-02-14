@@ -4,6 +4,13 @@ This is the source code accompanying the paper [***VOS: Learning What You Don’
 
 
 The codebase is heavily based on [ProbDet](https://github.com/asharakeh/probdet) and [Detectron2](https://github.com/facebookresearch/detectron2).
+
+## Requirements
+```
+pip install -r requirements.txt
+```
+In addition, install detectron2 following [here](https://detectron2.readthedocs.io/en/latest/tutorials/install.html).
+
 ## Dataset Preparation
 
 **PASCAL VOC**
@@ -73,11 +80,7 @@ Before training, modify the dataset address in the ./detection/core/datasets/set
 
  The OOD images with respect to different in-distribution datasets can be downloaded from [ID-VOC-OOD-COCO](https://drive.google.com/drive/folders/1NxodhoxTX5YBHJWHAa6tB2Ta1oxoTfzu?usp=sharing), [ID-VOC-OOD-openimages](https://drive.google.com/drive/folders/1pRP7CAWG7naDECfejo03cl7PF3VJEjrn?usp=sharing), [ID-BDD-OOD-COCO](https://drive.google.com/drive/folders/1Wgmfcp2Gd3YvYVyoRRBWUiwwKYXJeuo8?usp=sharing), [ID-BDD-OOD-openimages](https://drive.google.com/drive/folders/1LyOFqSm2G8x7d2xUkXma2pFJVOLgm3IQ?usp=sharing).
 
-## Requirements
-```
-pip install -r requirements.txt
-sudo apt-get install libmagickwand-dev
-```
+
 ## Training
 
 Firstly, enter the detection folder by running

@@ -5,9 +5,5 @@ sklearn
 opencv-python
 # Torch
 --find-links https://download.pytorch.org/whl/cu101/torch_stable.html
-torch==1.8.0
-torchvision==0.9.0
-
-# Detectron
---find-links https://dl.fbaipublicfiles.com/detectron2/wheels/cu101/torch1.8/index.html
-detectron2==0.6
+torch==1.7.1
+torchvision==0.8.2
