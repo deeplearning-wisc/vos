@@ -16,14 +16,14 @@ def setup_all_datasets(dataset_dir, image_root_corruption_prefix=None):
         dataset_dir(str): path to dataset directory
 
     """
-    setup_voc_dataset('/nobackup-slow/dataset/my_xfdu/VOCdevkit/VOC_0712_converted')
+    setup_voc_dataset(dataset_dir)
     setup_coco_dataset(
-        '/nobackup-slow/dataset/my_xfdu/coco2017/',
+        dataset_dir,
         image_root_corruption_prefix=image_root_corruption_prefix)
-    setup_coco_ood_dataset('/nobackup-slow/dataset/my_xfdu/coco2017')
-    setup_openim_odd_dataset('/nobackup-slow/dataset/my_xfdu/OpenImages/ood_classes_rm_overlap')
-    setup_bdd_dataset('/nobackup-slow/dataset/my_xfdu/bdd-100k/bdd100k')
-    setup_coco_ood_bdd_dataset('/nobackup-slow/dataset/my_xfdu/coco2017')
+    setup_coco_ood_dataset(dataset_dir)
+    setup_openim_odd_dataset(dataset_dir)
+    setup_bdd_dataset(dataset_dir)
+    setup_coco_ood_bdd_dataset(dataset_dir)
 
 def setup_coco_dataset(dataset_dir, image_root_corruption_prefix=None):
     """
@@ -95,7 +95,7 @@ def setup_openim_odd_dataset(dataset_dir):
 
     Only validation is supported.
     """
-    test_image_dir = os.path.join(dataset_dir, 'images')
+    test_image_dir = os.path.join(dataset_dir + 'ood_classes_rm_overlap', 'images')
 
     test_json_annotations = os.path.join(
         dataset_dir, 'COCO-Format', 'val_coco_format.json')
