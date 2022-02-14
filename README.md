@@ -84,6 +84,7 @@ cd detection
 ```
 
 python train_net.py
+--dataset-dir path/to/dataset/dir
 --num-gpus 8
 --config-file VOC-Detection/faster-rcnn/vanilla.yaml 
 --random-seed 0 
@@ -92,6 +93,7 @@ python train_net.py
 **Vanilla Faster-RCNN with BDD as the in-distribution dataset**
 ```
 python train_net.py 
+--dataset-dir path/to/dataset/dir
 --num-gpus 8 
 --config-file BDD-Detection/faster-rcnn/vanilla.yaml 
 --random-seed 0 
@@ -100,6 +102,7 @@ python train_net.py
 **VOS on ResNet**
 ```
 python train_net_gmm.py 
+--dataset-dir path/to/dataset/dir
 --num-gpus 8 
 --config-file VOC-Detection/faster-rcnn/vos.yaml 
 --random-seed 0 
@@ -110,6 +113,7 @@ python train_net_gmm.py
 Before training using the RegNet as the backbone, download the pretrained RegNet backbone from [here](https://drive.google.com/file/d/1WyE_OIpzV_0E_Y3KF4UVxIZJTSqB7cPO/view?usp=sharing).
 ```
 python train_net_gmm.py 
+--dataset-dir path/to/dataset/dir
 --num-gpus 8 
 --config-file VOC-Detection/faster-rcnn/regnetx.yaml 
 --random-seed 0 
