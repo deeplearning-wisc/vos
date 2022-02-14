@@ -74,7 +74,7 @@ The OpenImages dataset folder should have the following structure:
          ├── coco_classes
          └── ood_classes_rm_overlap
 
-Before training, modify the dataset address in the ./detection/core/datasets/setup_datasets.py according to your local dataset address.
+
 
 **Visualization of the OOD datasets**
 
@@ -87,6 +87,8 @@ Firstly, enter the detection folder by running
 ```
 cd detection
 ```
+
+Before training, modify the dataset address by changing "dataset-dir" according to your local dataset address.
 
 **Vanilla Faster-RCNN with VOC as the in-distribution dataset**
 ```
