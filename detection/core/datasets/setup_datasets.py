@@ -98,7 +98,7 @@ def setup_openim_odd_dataset(dataset_dir):
     test_image_dir = os.path.join(dataset_dir + 'ood_classes_rm_overlap', 'images')
 
     test_json_annotations = os.path.join(
-        dataset_dir, 'COCO-Format', 'val_coco_format.json')
+        dataset_dir + 'ood_classes_rm_overlap', 'COCO-Format', 'val_coco_format.json')
 
     register_coco_instances(
         "openimages_ood_val",
