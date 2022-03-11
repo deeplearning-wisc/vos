@@ -51,9 +51,7 @@ def main(args):
 
     # Eval only mode to produce mAP results
     # Build Trainer from config node. Begin Training.
-    # if cfg.MODEL.META_ARCHITECTURE == 'ProbabilisticDetr':
-    #     trainer = Detr_Trainer(cfg)
-    # else:
+
     trainer = Trainer(cfg)
 
     if args.eval_only:
@@ -67,7 +65,7 @@ def main(args):
         return res
 
     trainer.resume_or_load(resume=args.resume)
-    # breakpoint()
+
     return trainer.train()
 
 

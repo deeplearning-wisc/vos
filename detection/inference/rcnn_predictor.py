@@ -112,8 +112,6 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
             box_features = self.model.roi_heads.box_pooler(features, [x.proposal_boxes for x in proposals])
             box_features = self.model.roi_heads.box_head(box_features)
             predictions = self.model.roi_heads.box_predictor(box_features)
-            # import ipdb;
-            # ipdb.set_trace()
 
 
 
@@ -133,25 +131,10 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         box_cls = outputs['box_cls']
         box_delta = outputs['box_delta']
 
-        # if self.model.cls_var_loss == 'evidential':
-        #     box_dir_alphas = inference_utils.get_dir_alphas(box_cls)
-        #     box_dir_alphas = box_dir_alphas
-        #     box_cls = box_dir_alphas / box_dir_alphas.sum(1, keepdim=True)
-        # else:
-        if outputs['box_cls_var'] is not None:
-            box_cls_var = outputs['box_cls_var']
-            box_cls_dists = torch.distributions.normal.Normal(
-                box_cls, scale=torch.sqrt(torch.exp(box_cls_var)))
-            box_cls = box_cls_dists.rsample(
-                (self.model.cls_var_num_samples,))
-            box_cls = torch.nn.functional.softmax(box_cls, dim=-1)
-            box_cls = box_cls.mean(0)
-        else:
-            # breakpoint()
-            inter_feat = box_cls
-            box_cls = torch.nn.functional.softmax(box_cls, dim=-1)
+        inter_feat = box_cls
+        box_cls = torch.nn.functional.softmax(box_cls, dim=-1)
 
-        # import ipdb; ipdb.set_trace()
+
         # Remove background category
         scores = box_cls[:, :-1]
 
@@ -161,7 +144,7 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         filter_mask = scores > self.test_score_thres
 
         filter_inds = filter_mask.nonzero(as_tuple=False)
-        # breakpoint()
+
         if num_bbox_reg_classes == 1:
             box_delta = box_delta[filter_inds[:, 0], 0]
         else:
@@ -172,60 +155,15 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
 
         scores = scores[filter_mask]
         det_labels = det_labels[filter_mask]
-        # import ipdb; ipdb.set_trace()
+
         inter_feat = inter_feat[filter_inds[:, 0]]
         proposal_boxes = proposals.proposal_boxes.tensor[filter_inds[:, 0]]
-        # breakpoint()
-        if outputs['box_reg_var'] is not None:
-            box_reg_var = outputs['box_reg_var']
 
-            box_reg_var = box_reg_var.reshape(-1, self.model.bbox_cov_dims)
-            box_reg_var = box_reg_var.view(-1,
-                                           num_bbox_reg_classes,
-                                           self.model.bbox_cov_dims)
+        # predict boxes
+        boxes = self.model.roi_heads.box_predictor.box2box_transform.apply_deltas(
+            box_delta, proposal_boxes)
+        boxes_covars = []
 
-            if num_bbox_reg_classes == 1:
-                box_reg_var = box_reg_var[filter_inds[:, 0], 0]
-            else:
-                box_reg_var = box_reg_var[filter_mask]
-
-            # Reconstruct cholesky decomposition of box covariance
-            # matrix
-
-            diag_vars = clamp_log_variance(box_reg_var)
-            cholesky_decomp = covariance_output_to_cholesky(diag_vars)
-
-            # Generate multivariate samples to be used for monte-carlo simulation. We can afford much more samples
-            # here since the matrix dimensions are much smaller and therefore
-            # have much less memory footprint. Keep 100 or less to maintain
-            # reasonable runtime speed.
-            multivariate_normal_samples = torch.distributions.MultivariateNormal(
-                box_delta, scale_tril=cholesky_decomp)
-
-            # Define monte-carlo samples
-            distributions_samples = multivariate_normal_samples.rsample(
-                (1000,))
-            distributions_samples = torch.transpose(
-                torch.transpose(distributions_samples, 0, 1), 1, 2)
-
-            samples_proposals = torch.repeat_interleave(
-                proposal_boxes.unsqueeze(2), 1000, dim=2)
-            # import ipdb; ipdb.set_trace()
-            # Transform samples from deltas to boxes
-            t_dist_samples = self.sample_box2box_transform.apply_samples_deltas(
-                distributions_samples, samples_proposals)
-            # import ipdb;
-            # ipdb.set_trace()
-            # Compute samples mean and covariance matrices.
-            boxes, boxes_covars = inference_utils.compute_mean_covariance_torch(
-                t_dist_samples)
-        else:
-            # predict boxes
-            boxes = self.model.roi_heads.box_predictor.box2box_transform.apply_deltas(
-                box_delta, proposal_boxes)
-            boxes_covars = []
-        # import ipdb;
-        # ipdb.set_trace()
 
         return boxes, boxes_covars, scores, inter_feat, filter_inds[:,
                                                         1], box_cls[filter_inds[:, 0]], det_labels

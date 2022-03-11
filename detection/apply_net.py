@@ -69,7 +69,7 @@ def main(args):
         args,
         train_thing_dataset_id_to_contiguous_id,
         test_thing_dataset_id_to_contiguous_id)
-    # import ipdb; ipdb.set_trace()
+
     # Build predictor
     predictor = build_predictor(cfg)
     test_data_loader = build_detection_test_loader(
@@ -82,10 +82,9 @@ def main(args):
             with tqdm.tqdm(total=len(test_data_loader)) as pbar:
                 for idx, input_im in enumerate(test_data_loader):
                     # Apply corruption
-                    # breakpoint()
+
                     outputs = predictor(input_im)
-                    # breakpoint()
-                    # import ipdb; ipdb.set_trace()
+
                     if args.visualize:
                         if not os.path.exists(args.savefigdir):
                             os.makedirs(args.savefigdir)
@@ -104,7 +103,7 @@ def main(args):
                             input_im[0]['image_id'],
                             cat_mapping_dict))
                     pbar.update(1)
-                    # import ipdb; ipdb.set_trace()
+
 
         big_inference_output_dir = inference_output_dir
         with open(os.path.join(big_inference_output_dir, 'coco_instances_results.json'), 'w') as fp:
@@ -116,8 +115,7 @@ def main(args):
     else:
         compute_average_precision.main(args, cfg)
         compute_ood_probabilistic_metrics.main(args, cfg)
-        # compute_probabilistic_metrics.main(args, cfg)
-        # compute_calibration_errors.main(args, cfg)
+
 
 
 if __name__ == "__main__":
@@ -127,7 +125,7 @@ if __name__ == "__main__":
     # Support single gpu inference only.
     args.num_gpus = 1
     # args.num_machines = 8
-    # breakpoint()
+
     print("Command Line Args:", args)
 
     launch(

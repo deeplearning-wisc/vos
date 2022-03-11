@@ -11,9 +11,6 @@ from detectron2.structures import BoxMode, Boxes, Instances, pairwise_iou
 
 # Project imports
 from inference.image_corruptions import corruption_dict, corruption_tuple
-from inference.probabilistic_retinanet_predictor import RetinaNetProbabilisticPredictor
-from inference.probabilistic_rcnn_predictor import GeneralizedRcnnProbabilisticPredictor
-#from inference.probabilistic_detr_predictor import DetrProbabilisticPredictor
 from inference.rcnn_predictor import GeneralizedRcnnPlainPredictor
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -95,9 +92,7 @@ def general_standard_nms_postprocessing(input_im,
     else:
         result.pred_boxes_covariance = torch.zeros(
             predicted_boxes[keep].shape + (4,)).to(device)
-    # import ipdb;
-    # ipdb.set_trace()
-    # breakpoint()
+
     return result
 
 

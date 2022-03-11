@@ -456,179 +456,6 @@ class ROIHeads(torch.nn.Module):
         raise NotImplementedError()
 
 
-@ROI_HEADS_REGISTRY.register()
-class Res5ROIHeads(ROIHeads):
-    """
-    The ROIHeads in a typical "C4" R-CNN model, where
-    the box and mask head share the cropping and
-    the per-region feature computation by a Res5 block.
-    """
-
-    @configurable
-    def __init__(
-        self,
-        *,
-        in_features: List[str],
-        pooler: ROIPooler,
-        res5: nn.Module,
-        box_predictor: nn.Module,
-        mask_head: Optional[nn.Module] = None,
-        **kwargs
-    ):
-        """
-        NOTE: this interface is experimental.
-        Args:
-            in_features (list[str]): list of backbone feature map names to use for
-                feature extraction
-            pooler (ROIPooler): pooler to extra region features from backbone
-            res5 (nn.Sequential): a CNN to compute per-region features, to be used by
-                ``box_predictor`` and ``mask_head``. Typically this is a "res5"
-                block from a ResNet.
-            box_predictor (nn.Module): make box predictions from the feature.
-                Should have the same interface as :class:`FastRCNNOutputLayers`.
-            mask_head (nn.Module): transform features to make mask predictions
-        """
-        super().__init__(**kwargs)
-        self.in_features = in_features
-        self.pooler = pooler
-        self.res5 = res5
-        self.box_predictor = box_predictor
-        self.mask_on = mask_head is not None
-        if self.mask_on:
-            self.mask_head = mask_head
-
-    @classmethod
-    def from_config(cls, cfg, input_shape):
-        # fmt: off
-        ret = super().from_config(cfg)
-        in_features = ret["in_features"] = cfg.MODEL.ROI_HEADS.IN_FEATURES
-        pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
-        pooler_type       = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
-        pooler_scales     = (1.0 / input_shape[in_features[0]].stride, )
-        sampling_ratio    = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
-        mask_on           = cfg.MODEL.MASK_ON
-        # fmt: on
-        assert not cfg.MODEL.KEYPOINT_ON
-        assert len(in_features) == 1
-
-        ret["pooler"] = ROIPooler(
-            output_size=pooler_resolution,
-            scales=pooler_scales,
-            sampling_ratio=sampling_ratio,
-            pooler_type=pooler_type,
-        )
-
-        # Compatbility with old moco code. Might be useful.
-        # See notes in StandardROIHeads.from_config
-        if not inspect.ismethod(cls._build_res5_block):
-            logger.warning(
-                "The behavior of _build_res5_block may change. "
-                "Please do not depend on private methods."
-            )
-            cls._build_res5_block = classmethod(cls._build_res5_block)
-
-        ret["res5"], out_channels = cls._build_res5_block(cfg)
-        ret["box_predictor"] = FastRCNNOutputLayers(
-            cfg, ShapeSpec(channels=out_channels, height=1, width=1)
-        )
-
-        if mask_on:
-            ret["mask_head"] = build_mask_head(
-                cfg,
-                ShapeSpec(channels=out_channels, width=pooler_resolution, height=pooler_resolution),
-            )
-        return ret
-
-    @classmethod
-    def _build_res5_block(cls, cfg):
-        # fmt: off
-        stage_channel_factor = 2 ** 3  # res5 is 8x res2
-        num_groups           = cfg.MODEL.RESNETS.NUM_GROUPS
-        width_per_group      = cfg.MODEL.RESNETS.WIDTH_PER_GROUP
-        bottleneck_channels  = num_groups * width_per_group * stage_channel_factor
-        out_channels         = cfg.MODEL.RESNETS.RES2_OUT_CHANNELS * stage_channel_factor
-        stride_in_1x1        = cfg.MODEL.RESNETS.STRIDE_IN_1X1
-        norm                 = cfg.MODEL.RESNETS.NORM
-        assert not cfg.MODEL.RESNETS.DEFORM_ON_PER_STAGE[-1], \
-            "Deformable conv is not yet supported in res5 head."
-        # fmt: on
-
-        blocks = ResNet.make_stage(
-            BottleneckBlock,
-            3,
-            stride_per_block=[2, 1, 1],
-            in_channels=out_channels // 2,
-            bottleneck_channels=bottleneck_channels,
-            out_channels=out_channels,
-            num_groups=num_groups,
-            norm=norm,
-            stride_in_1x1=stride_in_1x1,
-        )
-        return nn.Sequential(*blocks), out_channels
-
-    def _shared_roi_transform(self, features, boxes):
-        x = self.pooler(features, boxes)
-        return self.res5(x)
-
-    def forward(self, images, features, proposals, targets=None):
-        """
-        See :meth:`ROIHeads.forward`.
-        """
-        del images
-
-        if self.training:
-            assert targets
-            proposals = self.label_and_sample_proposals(proposals, targets)
-        del targets
-
-        proposal_boxes = [x.proposal_boxes for x in proposals]
-        box_features = self._shared_roi_transform(
-            [features[f] for f in self.in_features], proposal_boxes
-        )
-        predictions = self.box_predictor(box_features.mean(dim=[2, 3]))
-
-        if self.training:
-            del features
-            losses = self.box_predictor.losses(predictions, proposals)
-            if self.mask_on:
-                proposals, fg_selection_masks = select_foreground_proposals(
-                    proposals, self.num_classes
-                )
-                # Since the ROI feature transform is shared between boxes and masks,
-                # we don't need to recompute features. The mask loss is only defined
-                # on foreground proposals, so we need to select out the foreground
-                # features.
-                mask_features = box_features[torch.cat(fg_selection_masks, dim=0)]
-                del box_features
-                losses.update(self.mask_head(mask_features, proposals))
-            return [], losses
-        else:
-            pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            pred_instances = self.forward_with_given_boxes(features, pred_instances)
-            return pred_instances, {}
-
-    def forward_with_given_boxes(self, features, instances):
-        """
-        Use the given boxes in `instances` to produce other (non-box) per-ROI outputs.
-        Args:
-            features: same as in `forward()`
-            instances (list[Instances]): instances to predict other outputs. Expect the keys
-                "pred_boxes" and "pred_classes" to exist.
-        Returns:
-            instances (Instances):
-                the same `Instances` object, with extra
-                fields such as `pred_masks` or `pred_keypoints`.
-        """
-        assert not self.training
-        assert instances[0].has("pred_boxes") and instances[0].has("pred_classes")
-
-        if self.mask_on:
-            features = [features[f] for f in self.in_features]
-            x = self._shared_roi_transform(features, [x.pred_boxes for x in instances])
-            return self.mask_head(x, instances)
-        else:
-            return instances
-
 
 @ROI_HEADS_REGISTRY.register()
 class ROIHeadsLogisticGMMNew(ROIHeads):
@@ -708,10 +535,8 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
         # torch.nn.init.xavier_normal_(self.logistic_regression.weight)
 
         self.select = 1
-        self.marker = 0
         self.sample_from = 10000
         self.loss_weight = 0.1
-        self.threshold = 145
         self.noise = GaussianNoise(sigma=1)
         self.weight_energy = torch.nn.Linear(self.num_classes, 1).cuda()
         torch.nn.init.uniform_(self.weight_energy.weight)
@@ -722,7 +547,6 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
         for i in range(self.num_classes):
             self.number_dict[i] = 0
         self.cos = torch.nn.MSELoss()  #
-        # self.cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
 
     @classmethod
     def from_config(cls, cfg, input_shape):
@@ -1020,8 +844,7 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
                             mean_embed_id[index], covariance_matrix=temp_precision)
                         negative_samples = new_dis.rsample((self.sample_from,))
                         prob_density = new_dis.log_prob(negative_samples)
-                        # breakpoint()
-                        # index_prob = (prob_density < - self.threshold).nonzero().view(-1)
+
                         # keep the data in the low density area.
                         cur_samples, index_prob = torch.topk(- prob_density, self.select)
                         if index == 0:
@@ -1060,10 +883,7 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
                             criterion = torch.nn.CrossEntropyLoss()#weight=weights_fg_bg)
                             output = self.logistic_regression(input_for_lr.view(-1, 1))
                             lr_reg_loss = criterion(output, labels_for_lr.long())
-                            # print(F.softmax(output, 1))
-                            # print(int(torch.argmax(F.softmax(output, 1), 1).eq(labels_for_lr).sum().item())/
-                            #       len(labels_for_lr))
-                            # lr_reg_loss = F.binary_cross_entropy_with_logits(output, labels_for_lr.view(-1,1))
+
                     del ood_samples
 
                 else:
@@ -1184,28 +1004,3 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
             features = dict([(f, features[f]) for f in self.keypoint_in_features])
         return self.keypoint_head(features, instances)
 
-class GaussianNoise(nn.Module):
-    """Gaussian noise regularizer.
-
-    Args:
-        sigma (float, optional): relative standard deviation used to generate the
-            noise. Relative means that it will be multiplied by the magnitude of
-            the value your are adding the noise to. This means that sigma can be
-            the same regardless of the scale of the vector.
-        is_relative_detach (bool, optional): whether to detach the variable before
-            computing the scale of the noise. If `False` then the scale of the noise
-            won't be seen as a constant but something to optimize: this will bias the
-            network to generate vectors with smaller values.
-    """
-    def __init__(self, sigma=0.1, is_relative_detach=True):
-        super().__init__()
-        self.sigma = sigma
-        self.is_relative_detach = is_relative_detach
-        self.register_buffer('noise', torch.tensor(0))
-
-    def forward(self, x):
-        if self.training and self.sigma != 0:
-            scale = self.sigma * x.detach() if self.is_relative_detach else self.sigma * x
-            sampled_noise = self.noise.expand(*x.size()).float().normal_() * scale
-            x = x + sampled_noise
-        return x
