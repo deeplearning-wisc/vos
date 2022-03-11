@@ -5,6 +5,10 @@ This is the source code accompanying the paper [***VOS: Learning What You Don’
 
 The codebase is heavily based on [ProbDet](https://github.com/asharakeh/probdet) and [Detectron2](https://github.com/facebookresearch/detectron2).
 
+## Ads 
+
+Checkout our similar CVPR'22 work [STUD](https://github.com/deeplearning-wisc/stud) on object detection in video datasets if you are interested!
+
 ## Requirements
 ```
 pip install -r requirements.txt
