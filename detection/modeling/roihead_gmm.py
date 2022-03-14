@@ -537,7 +537,6 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
         self.select = 1
         self.sample_from = 10000
         self.loss_weight = 0.1
-        self.noise = GaussianNoise(sigma=1)
         self.weight_energy = torch.nn.Linear(self.num_classes, 1).cuda()
         torch.nn.init.uniform_(self.weight_energy.weight)
         self.data_dict = torch.zeros(self.num_classes, self.sample_number, 1024).cuda()
