@@ -179,7 +179,7 @@ Firstly run on the in-distribution dataset:
 python apply_net.py 
 --dataset-dir path/to/dataset/dir
 --test-dataset bdd_custom_val 
---config-file VOC-Detection/faster-rcnn/vos.yaml 
+--config-file BDD-Detection/faster-rcnn/vos.yaml 
 --inference-config Inference/standard_nms.yaml 
 --random-seed 0 
 --image-corruption-level 0 
@@ -191,7 +191,7 @@ Then run on the OOD dataset:
 python apply_net.py 
 --dataset-dir path/to/dataset/dir
 --test-dataset coco_ood_val_bdd 
---config-file VOC-Detection/faster-rcnn/vos.yaml 
+--config-file BDD-Detection/faster-rcnn/vos.yaml 
 --inference-config Inference/standard_nms.yaml 
 --random-seed 0 
 --image-corruption-level 0 
