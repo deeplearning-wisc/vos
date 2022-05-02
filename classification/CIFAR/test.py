@@ -11,8 +11,8 @@ import torchvision.datasets as dset
 import torch.nn.functional as F
 # from models.wrn import WideResNet
 # from models.densenet import DenseNet3
-from models.wrn_godin import WideResNet
-from models.densenet_godin import DenseNet3
+from models.wrn_virtual import WideResNet
+from models.densenet import DenseNet3
 from skimage.filters import gaussian as gblur
 from PIL import Image as PILImage
 
