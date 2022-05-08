@@ -530,11 +530,7 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
         self.start_iter = self.cfg.VOS.STARTING_ITER
         # print(self.sample_number, self.start_iter)
 
-        self.logistic_regression = nn.Sequential(
-            torch.nn.Linear(1, 512),
-            torch.nn.ReLU(),
-            torch.nn.Linear(512, 1)
-        )
+        self.logistic_regression = torch.nn.Linear(1, 2)
         self.logistic_regression.cuda()
         # torch.nn.init.xavier_normal_(self.logistic_regression.weight)
 
@@ -732,7 +728,6 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
 
     def log_sum_exp(self, value, dim=None, keepdim=False):
         """Numerically stable implementation of the operation
-
         value.exp().sum(dim, keepdim).log()
         """
         import math
@@ -870,16 +865,16 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
                         input_for_lr = torch.cat((energy_score_for_fg, energy_score_for_bg), -1)
                         labels_for_lr = torch.cat((torch.ones(len(selected_fg_samples)).cuda(),
                                                    torch.zeros(len(ood_samples)).cuda()), -1)
-                        if True:
+                        if False:
                             output = self.logistic_regression(input_for_lr.view(-1, 1))
                             lr_reg_loss = F.binary_cross_entropy_with_logits(
                                 output.view(-1), labels_for_lr)
-                            #print(torch.cat((
-                            #    F.sigmoid(output[:len(selected_fg_samples)]).view(-1, 1),
-                            #              torch.ones(len(selected_fg_samples), 1).cuda()), 1))
-                            #print(torch.cat((
-                            #    F.sigmoid(output[len(selected_fg_samples):]).view(-1, 1),
-                            #    torch.zeros(len(ood_samples), 1).cuda()), 1))
+                            print(torch.cat((
+                                F.sigmoid(output[:len(selected_fg_samples)]).view(-1, 1),
+                                          torch.ones(len(selected_fg_samples), 1).cuda()), 1))
+                            print(torch.cat((
+                                F.sigmoid(output[len(selected_fg_samples):]).view(-1, 1),
+                                torch.zeros(len(ood_samples), 1).cuda()), 1))
                         else:
                             weights_fg_bg = torch.Tensor([len(selected_fg_samples) / float(len(input_for_lr)),
                                                          len(ood_samples) / float(len(input_for_lr))]).cuda()
@@ -899,10 +894,8 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
                             self.data_dict[dict_key][self.number_dict[dict_key]] = box_features[index].detach()
                             self.number_dict[dict_key] += 1
                 # create a dummy in order to have all weights to get involved in for a loss.
-                loss_dummy = self.cos(self.logistic_regression(torch.zeros(1).cuda()),
-                                      self.logistic_regression(torch.zeros(1).cuda()))
-                loss_dummy1 = self.cos(self.weight_energy(torch.zeros(self.num_classes).cuda()),
-                                       self.weight_energy(torch.zeros(self.num_classes).cuda()))
+                loss_dummy = self.cos(self.logistic_regression(torch.zeros(1).cuda()), self.logistic_regression.bias)
+                loss_dummy1 = self.cos(self.weight_energy(torch.zeros(self.num_classes).cuda()), self.weight_energy.bias)
                 del box_features
                 # print(self.number_dict)
 
@@ -1008,4 +1001,3 @@ class ROIHeadsLogisticGMMNew(ROIHeads):
         else:
             features = dict([(f, features[f]) for f in self.keypoint_in_features])
         return self.keypoint_head(features, instances)
-

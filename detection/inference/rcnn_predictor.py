@@ -132,8 +132,6 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         box_delta = outputs['box_delta']
 
         inter_feat = box_cls
-        logistic_score = self.model.roi_heads.logistic_regression(
-            torch.logsumexp(box_cls[:, :-1], 1).reshape(-1,1)).sigmoid().reshape(-1)
         box_cls = torch.nn.functional.softmax(box_cls, dim=-1)
 
 
@@ -159,7 +157,6 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         det_labels = det_labels[filter_mask]
 
         inter_feat = inter_feat[filter_inds[:, 0]]
-        logistic_score = logistic_score[filter_inds[:, 0]]
         proposal_boxes = proposals.proposal_boxes.tensor[filter_inds[:, 0]]
 
         # predict boxes
@@ -168,20 +165,17 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         boxes_covars = []
 
 
-        return boxes, boxes_covars, scores, inter_feat, logistic_score, filter_inds[:,
+        return boxes, boxes_covars, scores, inter_feat, filter_inds[:,
                                                         1], box_cls[filter_inds[:, 0]], det_labels
 
     def post_processing_standard_nms(self, input_im):
         """
         This function produces results using standard non-maximum suppression. The function takes into
         account any probabilistic modeling method when computing the results.
-
         Args:
             input_im (list): an input im list generated from dataset handler.
-
         Returns:
             result (instances): object instances
-
         """
         outputs = self.generalized_rcnn_probabilistic_inference(input_im)
 
@@ -191,10 +185,8 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
     def post_processing_output_statistics(self, input_im):
         """
         This function produces results using anchor statistics.
-
         Args:
             input_im (list): an input im list generated from dataset handler.
-
         Returns:
             result (instances): object instances
         """
@@ -211,10 +203,8 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
     def post_processing_mc_dropout_ensembles(self, input_im):
         """
         This function produces results using monte-carlo dropout ensembles.
-
         Args:
             input_im (list): an input im list generated from dataset handler.
-
         Returns:
             result (instances): object instances
         """
@@ -315,13 +305,10 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         """
         This function produces results using forms of bayesian inference instead of NMS for both category
         and box results.
-
         Args:
             input_im (list): an input im list generated from dataset handler.
-
         Returns:
             result (instances): object instances
-
         """
         box_merge_mode = self.cfg.PROBABILISTIC_INFERENCE.BAYES_OD.BOX_MERGE_MODE
         cls_merge_mode = self.cfg.PROBABILISTIC_INFERENCE.BAYES_OD.CLS_MERGE_MODE
