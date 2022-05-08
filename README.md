@@ -207,9 +207,9 @@ python bdd_coco_plot.py
 ```
 **Pretrained models**
 
-The pretrained models for Pascal-VOC can be downloaded from [vanilla](https://drive.google.com/file/d/10tfHHSdjXPds8ol46HU3G62zPS5tCcTu/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1Q8Gq9QhacBDwfIPHdE6ArNaAqaJQHJzl/view?usp=sharing) and [VOS-RegNet](https://drive.google.com/file/d/1W4yltGF-wvzwEuImaDwMLT-GeOnhcdaB/view?usp=sharing).
+The pretrained models for Pascal-VOC can be downloaded from [vanilla](https://drive.google.com/file/d/10tfHHSdjXPds8ol46HU3G62zPS5tCcTu/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1MBzk2o9rLfR9ZwkEbcJlCllMLgTMblIR/view?usp=sharing).
 
-The pretrained models for BDD-100k can be downloaded from [vanilla](https://drive.google.com/file/d/16D4GOlSPSrY9-Y0gZlB13NczZAegjF1D/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1CJoweDQkNUDi2Gz8qeA1DruaBQig6i1b/view?usp=sharing) and [VOS-RegNet](https://drive.google.com/file/d/1DFBkYLSTLJaQpr3mC0BGLQf04h5vRFhp/view?usp=sharing).
+The pretrained models for BDD-100k can be downloaded from [vanilla](https://drive.google.com/file/d/16D4GOlSPSrY9-Y0gZlB13NczZAegjF1D/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1MBzk2o9rLfR9ZwkEbcJlCllMLgTMblIR/view?usp=sharing).
 
 
 ## VOS on Classification models
