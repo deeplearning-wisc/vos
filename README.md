@@ -9,6 +9,10 @@ The codebase is heavily based on [ProbDet](https://github.com/asharakeh/probdet)
 
 Checkout our similar CVPR'22 work [STUD](https://github.com/deeplearning-wisc/stud) on object detection in video datasets if you are interested!
 
+## Update
+
+05/08/2022---We have updated the openreview with the new results of using a nonlinear MLP for binary classification instead of the logistic regression. Please check the code and models [here](https://github.com/deeplearning-wisc/vos/tree/main-MLP).
+
 ## Requirements
 ```
 pip install -r requirements.txt
