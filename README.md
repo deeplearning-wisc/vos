@@ -11,7 +11,7 @@ Checkout our similar CVPR'22 work [STUD](https://github.com/deeplearning-wisc/st
 
 ## Update
 
-05/08/2022---We have updated the openreview with the new results of using a nonlinear MLP for binary classification instead of the logistic regression. Please check the code and models [here](https://github.com/deeplearning-wisc/vos/tree/main-MLP).
+05/08/2022---We have updated the openreview with the new results of using a nonlinear MLP for binary classification instead of the logistic regression, which is slightly better. Please check the code and models [here](https://github.com/deeplearning-wisc/vos/tree/main-MLP).
 
 ## Requirements
 ```
