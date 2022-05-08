@@ -209,7 +209,7 @@ python bdd_coco_plot.py
 
 The pretrained models for Pascal-VOC can be downloaded from [vanilla](https://drive.google.com/file/d/10tfHHSdjXPds8ol46HU3G62zPS5tCcTu/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1MBzk2o9rLfR9ZwkEbcJlCllMLgTMblIR/view?usp=sharing).
 
-The pretrained models for BDD-100k can be downloaded from [vanilla](https://drive.google.com/file/d/16D4GOlSPSrY9-Y0gZlB13NczZAegjF1D/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1MBzk2o9rLfR9ZwkEbcJlCllMLgTMblIR/view?usp=sharing).
+The pretrained models for BDD-100k can be downloaded from [vanilla](https://drive.google.com/file/d/16D4GOlSPSrY9-Y0gZlB13NczZAegjF1D/view?usp=sharing) and [VOS-ResNet](https://drive.google.com/file/d/1YbEdK8Cvzh1JnJrxSYJWWKI14Qrk7wZA/view?usp=sharing).
 
 
 ## VOS on Classification models
