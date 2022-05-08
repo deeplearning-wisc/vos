@@ -132,6 +132,8 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         box_delta = outputs['box_delta']
 
         inter_feat = box_cls
+        logistic_score = self.model.roi_heads.logistic_regression(
+            torch.logsumexp(box_cls[:, :-1], 1).reshape(-1,1)).sigmoid().reshape(-1)
         box_cls = torch.nn.functional.softmax(box_cls, dim=-1)
 
 
@@ -157,6 +159,7 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         det_labels = det_labels[filter_mask]
 
         inter_feat = inter_feat[filter_inds[:, 0]]
+        logistic_score = logistic_score[filter_inds[:, 0]]
         proposal_boxes = proposals.proposal_boxes.tensor[filter_inds[:, 0]]
 
         # predict boxes
@@ -165,7 +168,7 @@ class GeneralizedRcnnPlainPredictor(ProbabilisticPredictor):
         boxes_covars = []
 
 
-        return boxes, boxes_covars, scores, inter_feat, filter_inds[:,
+        return boxes, boxes_covars, scores, inter_feat, logistic_score, filter_inds[:,
                                                         1], box_cls[filter_inds[:, 0]], det_labels
 
     def post_processing_standard_nms(self, input_im):
