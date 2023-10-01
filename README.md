@@ -7,7 +7,11 @@ The codebase is heavily based on [ProbDet](https://github.com/asharakeh/probdet)
 
 ## Ads 
 
-Checkout our CVPR'22 work [STUD](https://github.com/deeplearning-wisc/stud) on object detection in video datasets,  NeurIPS'22 work [SIREN](https://github.com/deeplearning-wisc/siren) on OOD detection for detection transformers if you are interested!
+Checkout our
+* CVPR'22 work [STUD](https://github.com/deeplearning-wisc/stud) on object detection in video datasets.
+* NeurIPS'22 work [SIREN](https://github.com/deeplearning-wisc/siren) on OOD detection for detection transformers.
+* ICLR'23 work [NPOS](https://openreview.net/forum?id=JHklpEZqduQ) on non-parametric outlier synthesis.
+* NeurIPS'23 work [DREAM-OOD](https://arxiv.org/pdf/2309.13415.pdf) on outlier generation in the pixel space (by diffusion models) if you are interested!
 
 ## Update
 
